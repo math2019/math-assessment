@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advanced Math Assessment</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <header class="text-center py-5 bg-blue-600 text-white">
+    <h1 class="text-3xl font-bold">Advanced Math Assessment</h1>
+  </header>
+
+  <main class="p-5">
+    <!-- Unit Selection -->
+    <section class="mb-5">
+      <h2 class="text-xl font-semibold">Choose a Unit</h2>
+      <select id="unitSelect" class="mt-2 p-2 border rounded">
+        <option value="limits">Limits</option>
+        <option value="derivatives">Derivatives</option>
+        <option value="integrals">Integrals</option>
+      </select>
+      <button onclick="startAssessment()" class="ml-4 px-4 py-2 bg-green-500 text-white rounded">Start</button>
+    </section>
+
+    <!-- Questions Area -->
+    <section id="questionArea" class="hidden">
+      <h2 class="text-xl font-semibold">Questions</h2>
+      <form id="quizForm" class="mt-4 space-y-4">
+        <!-- Questions will be injected here -->
+      </form>
+      <button onclick="submitAnswers()" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">Submit</button>
+    </section>
+
+    <!-- Results -->
+    <section id="results" class="mt-5 hidden">
+      <h2 class="text-xl font-semibold">Your Results</h2>
+      <p id="scoreText" class="mt-2"></p>
+    </section>
+  </main>
+
+  <script>
+    const questions = {
+      limits: [
+        { q: "Find the limit: lim(x→0) sin(x)/x", a: "1" },
+        { q: "Evaluate: lim(x→∞) 1/x", a: "0" }
+      ],
+      derivatives: [
+        { q: "What is the derivative of f(x) = x²?", a: "2x" },
+        { q: "Find f'(x) for f(x) = sin(x)", a: "cos x" }
+      ],
+      integrals: [
+        { q: "Evaluate ∫x dx", a: "0.5x^2 + C" },
+        { q: "Find ∫cos(x) dx", a: "sin x + C" }
+      ]
+    };
+
+    function startAssessment() {
+      const unit = document.getElementById("unitSelect").value;
+      const quizForm = document.getElementById("quizForm");
+      quizForm.innerHTML = "";
+      questions[unit].forEach((item, index) => {
+        quizForm.innerHTML += `
+          <div>
+            <label class="block font-medium">${item.q}</label>
+            <input type="text" name="q${index}" class="mt-1 p-2 border rounded w-full" />
+          </div>
+        `;
+      });
+      document.getElementById("questionArea").classList.remove("hidden");
+      document.getElementById("results").classList.add("hidden");
+    }
+
+    function submitAnswers() {
+      const unit = document.getElementById("unitSelect").value;
+      const form = document.getElementById("quizForm");
+      const inputs = form.querySelectorAll("input");
+      let score = 0;
+      let answers = [];
+
+      inputs.forEach((input, i) => {
+        const correct = questions[unit][i].a.toLowerCase();
+        const response = input.value.trim().toLowerCase();
+        answers.push({ question: questions[unit][i].q, answer: response });
+        if (response === correct) score++;
+      });
+
+      const payload = {
+        name: prompt("Enter your name:"),
+        unit: unit,
+        score: score,
+        total: questions[unit].length,
+        answers: answers
+      };
+
+      fetch("YOUR_WEB_APP_URL", {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(() => {
+        document.getElementById("scoreText").textContent = `You scored ${score} out of ${questions[unit].length}`;
+        document.getElementById("results").classList.remove("hidden");
+      });
+    }
+  </script>
+</body>
+</html>
